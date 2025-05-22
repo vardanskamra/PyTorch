@@ -6,9 +6,9 @@ import torch
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple # To enable type hinting
 
-def train_step(model: torch.nn.module,
+def train_step(model: torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
-               loss_fn: torch.nn.module,
+               loss_fn: torch.nn.Module,
                optimizer: torch.optim.Optimizer,
                device: torch.device) -> Tuple[float, float]:
     """
@@ -33,7 +33,7 @@ def train_step(model: torch.nn.module,
     model.train()
     
     # Setup loss and accuracy values
-    train_loss, train_acc = 0
+    train_loss, train_acc = 0, 0
     
     # Loop through the data loader batches
     for batch, (X, y) in enumerate(dataloader):
@@ -65,10 +65,11 @@ def train_step(model: torch.nn.module,
     train_loss = train_loss / len(dataloader)
     train_acc = train_acc / len(dataloader)
     
+    return train_loss, train_acc
 
-def test_step(model: torch.nn.module,
+def test_step(model: torch.nn.Module,
               dataloader: torch.utils.data.DataLoader,
-              loss_fn: torch.nn.module,
+              loss_fn: torch.nn.Module,
               device: torch.device) -> Tuple[float, float]:
     """
     Turns a target PyTorch model to "eval" mode and then performs
@@ -106,17 +107,17 @@ def test_step(model: torch.nn.module,
             
             # Calculate and accumulate accuracy
             test_pred_labels = test_pred_logits.argmax(dim=1)
-            test_acc += ((teest_pred_labels == y).sum().item()/len(test_pred_labels))
+            test_acc += ((test_pred_labels == y).sum().item()/len(test_pred_labels))
             
     test_loss = test_loss / len(dataloader)
     test_acc = test_acc / len(dataloader)
     return test_loss, test_acc
 
-def train(model: torch.nn.module,
+def train(model: torch.nn.Module,
           train_dataloader: torch.utils.data.DataLoader,
           test_dataloader: torch.utils.data.DataLoader,
           optimizer: torch.optim.Optimizer,
-          loss_fn: torch.nn.module,
+          loss_fn: torch.nn.Module,
           epochs: int,
           device: torch.device) -> Dict[str, List]:
     """
@@ -155,22 +156,22 @@ def train(model: torch.nn.module,
     results = {'train_loss': [],
                'train_acc': [],
                'test_loss': [],
-               'test_acc',: []}
+               'test_acc': []}
     
     for epoch in tqdm(range(epochs)):
         train_loss, train_acc = train_step(model=model,
                                            dataloader=train_dataloader,
                                            loss_fn=loss_fn,
                                            optimizer = optimizer,
-                                           device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
+                                           device = device)
         
         test_loss, test_acc = test_step(model=model,
                                         dataloader=test_dataloader,
                                         loss_fn=loss_fn,
-                                        device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
+                                        device = device)
         
         print(f"Epoch: {epoch+1} | "
-              f"train_loss: {} | "
+              f"train_loss: {train_loss:.4f} | "
               f"train_acc: {train_acc:.4f} | "
               f"test_loss: {test_loss:.4f} | "
               f"test_acc: {test_acc:.4f}")

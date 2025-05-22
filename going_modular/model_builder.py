@@ -16,7 +16,7 @@ class TinyVGG(nn.Module):
         output_shape: Integer indicating number of output units
     """
     
-    def __init__(Self, input_shape: int, hidden_units: int, output_shape: int) -> None:
+    def __init__(self, input_shape: int, hidden_units: int, output_shape: int) -> None:
         super().__init__()
         self.conv_block_1 = nn.Sequential(
             nn.Conv2d(in_channels=input_shape,
@@ -35,7 +35,7 @@ class TinyVGG(nn.Module):
                          stride=2)
         )
         self.conv_block_2 = nn.Sequential(
-            nn.Conv2d(in_channels=input_shape,
+            nn.Conv2d(in_channels=hidden_units,
                       out_channels=hidden_units,
                       kernel_size=3,
                       stride=1,
